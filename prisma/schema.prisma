@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  id        Int         @id @default(autoincrement())
+  name      String
+  username  String      @unique
+  createdAt DateTime    @default(now())
+  Donations Donations[]
+
+  @@map("users")
+}
+
+model Institutions {
+  id        Int         @id @default(autoincrement())
+  name      String      @unique
+  campaigns Campaigns[]
+  createdAt DateTime    @default(now())
+  Donations Donations[]
+
+  @@map("institutions")
+}
+
+model Campaigns {
+  id              Int          @id @default(autoincrement())
+  name            String       @unique
+  description     String
+  institution     Institutions @relation(fields: [institutionName], references: [name])
+  institutionName String
+  Donations       Donations[]
+  createdAt       DateTime     @default(now())
+
+  @@unique([name, institutionName])
+  @@map("campaigns")
+}
+
+model Donations {
+  id              Int          @id @default(autoincrement())
+  user            Users        @relation(fields: [userName], references: [username])
+  userName        String
+  institution     Institutions @relation(fields: [institutionName], references: [name])
+  institutionName String
+  campaigns       Campaigns    @relation(fields: [campaignName], references: [name])
+  campaignName    String
+  item            String
+  amount          Int
+  createdAt       DateTime     @default(now())
+
+  @@map("donations")
+}
